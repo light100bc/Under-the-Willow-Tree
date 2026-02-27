@@ -1,4 +1,4 @@
-from ai import SimpleAI
+from ai.ai import SimpleAI
 import my_enum
 
 class MAN():
@@ -17,17 +17,6 @@ class MAN():
     def __repr__(self):
         return f"{self.name}(happy={self.mood})(stomagche={self.hunger})"
     
-    def marry(self,spouse):
-        self.spouse = spouse
-    
-    def divorce(self):
-        self.wife = None
-
-    def get_job(self,job):
-        self.job = job
-    
-    def lost_job(self):
-        self.job = None
 
     def set_mood(self,mood,value,method=my_enum.MOOD_METHOD.SET):
         if not mood or mood not in my_enum.MOOD: return

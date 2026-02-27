@@ -1,4 +1,5 @@
 import tkinter as tk
+from query.query_actions import print_entity
 
 
 class GameUI:
@@ -36,11 +37,11 @@ class GameUI:
         selection = self.listbox.curselection()
         if selection:
             index = selection[0]
-            npc = self.world.npcs[index]
-            self.controller.feed_npc(npc)
+            entity = self.world.entities[index]
+            self.controller.feed_npc(entity)
             self.refresh()
 
     def refresh(self):
         self.listbox.delete(0, tk.END)
-        for npc in self.world.npcs:
-            self.listbox.insert(tk.END, str(npc))
+        for entity in self.world.entities:
+            self.listbox.insert(tk.END, print_entity(entity,self.world))

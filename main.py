@@ -1,13 +1,22 @@
 import time
 
-from game_controller import GameController
-from ui import GameUI
-from world import World
-from character import MAN
+from controller.game_controller import GameController
+import my_enum
+from ai.AI_system import AISystem
+from system.system import EmotionSystem, MarriageSystem
+from ui.ui import GameUI
+from core.world import World
+from entity.character import MAN
 import tkinter as tk
+
+def generate_world(world):
+    world.add_system(my_enum.SYSTEM.MarriageSystem,MarriageSystem(world))
+    world.add_system(my_enum.SYSTEM.EmotionSystem,EmotionSystem(world))
+    world.add_system(my_enum.SYSTEM.AISystem,AISystem())
 
 def main():
     world = World()
+    generate_world(world)
     controller = GameController(world)
 
     root = tk.Tk()

@@ -1,7 +1,10 @@
+from ai.ai import SimpleAI
+
 class AISystem:
     def update(self, world):
-        for npc in world.npcs:
-            actions = npc.ai.choose_action(npc, world)
+        for entity in world.entities:
+            ai=SimpleAI()
+            actions = ai.choose_action(entity, world)
             if actions:
                 for action in actions:
                     world.dispatch(action)

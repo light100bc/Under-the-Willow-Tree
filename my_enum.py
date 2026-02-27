@@ -12,3 +12,8 @@ class MOOD(Enum):
 class SEX(Enum):
     MALE = "MALE"
     FEMALE = "FEMALE"
+
+class SYSTEM(Enum):
+     MarriageSystem = "MARRIAGE_SYSTEM"
+     EmotionSystem = "EMOTION_SYSTEM"
+     AISystem = "AI_SYSTEM"
