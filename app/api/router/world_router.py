@@ -1,48 +1,31 @@
-#fetch("/player/move", {
-#   method: "POST",
-#   body: JSON.stringify({
-#     entity_id: 1,
-#     target_x: 10,
-#     target_y: 5
-#   })
-# })
-import asyncio
-
-from fastapi import APIRouter
-from app.container import game_engine,query_service
+from fastapi import APIRouter, Request
 
 router = APIRouter(prefix="/world")
 
+
+def get_container(request: Request):
+    return request.app.state.container
+
+
 @router.post("/tick")
-def tick():
-    game_engine.step()
+def tick(request: Request):
+    get_container(request).game_engine.step()
     return {"status": "one tick"}
 
 
 @router.post("/start")
-async def start_world():
-    asyncio.create_task(game_engine.start())
-    return {"status": "world started"}
+async def start_world(request: Request):
+    started = get_container(request).game_engine.start()
+    status = "world started" if started else "world already running"
+    return {"status": status}
+
 
 @router.post("/stop")
-def stop_world():
-    game_engine.stop()
+def stop_world(request: Request):
+    get_container(request).game_engine.stop()
     return {"status": "world stopped"}
 
+
 @router.post("/print")
-def print_world():
-    res=query_service.query_world() 
-    return res
-# @router.post("/player/move")
-# def move_player(req: MoveRequest):
-
-#     # 生成 Action
-#     action = MoveAction(
-#         entity_id=req.entity_id,
-#         target_position=(req.target_x, req.target_y)
-#     )
-
-#     # 加入调度队列
-#     world.scheduler.schedule(action)
-
-#     return {"status": "ok"}
+def print_world(request: Request):
+    return get_container(request).query_service.query_world()

@@ -9,44 +9,25 @@ from app.domain.system.spawn_system import SpawnSystem
 class Executor:
     def __init__(self, world):
         self.world = world
-
-        self.systems = {
-            SetMood: EmotionSystem(world),
-            Eat:EatSystem(world),
-            # "move": MovementSystem(world),
-            CreateNPC: SpawnSystem(world),
+        self.system_types = {
+            SetMood: EmotionSystem,
+            Eat: EatSystem,
+            CreateNPC: SpawnSystem,
         }
 
     def execute(self, actions):
-
-        #actions = [
-#     EatAction(1),
-#     EatAction(5),
-#     MoveAction(3),
-#     EatAction(8),
-# ]
-# =>合并成
-# grouped = {
-#     "eat": [EatAction(1), EatAction(5), EatAction(8)],
-#     "move": [MoveAction(3)]
-# }
-        # 按类型分组
-        # action和执行分开，才可批处理（多个actions合并）
         while actions:
-
             grouped = {}
-
             for action in actions:
                 grouped.setdefault(type(action), []).append(action)
 
-            new_actions=[] #action可能触发其它action，用循环在同一个tick做掉
-
-            # 分发给 system
+            new_actions = []
             for action_type, acts in grouped.items():
-                system = self.systems.get(action_type)
+                system_type = self.system_types.get(action_type)
+                system = self.world.get_system(system_type) if system_type else None
                 if system:
-                    res=system.process(acts)
+                    res = system.process(acts)
                     if res:
                         new_actions.extend(res)
 
-            actions= new_actions
+            actions = new_actions
