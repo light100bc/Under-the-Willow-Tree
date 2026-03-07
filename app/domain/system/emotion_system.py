@@ -34,13 +34,13 @@ class EmotionSystem:
     def process(self,actions):
         for action in actions:
             if type(action.entity)==list:
-                for a in action:
-                    if a.method==my_enum.MOOD_METHOD.CALCULATE:
-                        self.world.l2.components[EmotionData][action.mood][a.entity]+=a.value
+                for i,eid in enumerate(action.entity): 
+                    if action.method[i]==my_enum.MOOD_METHOD.CALCULATE:
+                        self.world.l2.components[EmotionData].moods[action.mood[i]][eid]+=action.value[i]
                     else:
-                        self.world.l2.components[EmotionData][action.mood][a.entity]=a.value
+                        self.world.l2.components[EmotionData].moods[action.mood[i]][eid]=action.value[i]
             else:
                 if action.method==my_enum.MOOD_METHOD.CALCULATE:
-                    self.world.l2.components[EmotionData][action.mood][action.entity]+=action.value
+                    self.world.l2.components[EmotionData].moods[action.mood][action.entity]+=action.value
                 else:
-                    self.world.l2.components[EmotionData][action.mood][action.entity]=action.value
+                    self.world.l2.components[EmotionData].moods[action.mood][action.entity]=action.value

@@ -5,8 +5,8 @@ class SetMood(Action):
     def __init__(self, entity,mood,value,method=my_enum.MOOD_METHOD.SET):
         self.entity = entity
         self.mood = mood
-        self.method = method
         self.value=value
+        self.method = method
 
     # def apply(self,world):
     #     if not self.mood or self.mood not in my_enum.MOOD: return

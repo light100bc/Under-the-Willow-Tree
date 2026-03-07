@@ -5,6 +5,6 @@ class ActionService:
     def __init__(self, world):
         self.world = world
 
-    def eat(self, npc_id):
-        action = Eat(npc_id)
+    def eat(self, npc_id,value):
+        action = Eat(npc_id,value)
         self.world.scheduler.schedule(action)

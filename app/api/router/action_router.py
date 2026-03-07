@@ -6,5 +6,5 @@ from app.container import action_service
 router = APIRouter(prefix="/action")
 @router.post("/eat")
 def eat(req : EatRequest):
-    action_service.create_npc(req.entity,req.value)
+    action_service.eat(req.entity,req.value)
     return {"status": "ok"}
