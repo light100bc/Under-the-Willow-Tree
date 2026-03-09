@@ -7,6 +7,7 @@ class SetMood(Action):
         self.mood = mood
         self.value=value
         self.method = method
+        
 
     # def apply(self,world):
     #     if not self.mood or self.mood not in my_enum.MOOD: return

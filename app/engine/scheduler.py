@@ -22,7 +22,6 @@ class Scheduler:
         执行所有行为
         """
         actions=[]
-        while self.queue:
-            action = self.queue.popleft()
-            actions.append(action)
+        actions = list(self.queue)
+        self.queue.clear()
         self.executor.execute(actions)

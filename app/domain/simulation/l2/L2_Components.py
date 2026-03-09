@@ -9,7 +9,7 @@ class L2Components:
     def __init__(self, capacity):
 
         self.capacity = capacity
-
+        
         self.components={}
         self.components.update({NameData: NameData(capacity), HungerData:  HungerData(capacity), 
                                 PositionData: PositionData(capacity), EmotionData: EmotionData(capacity)})

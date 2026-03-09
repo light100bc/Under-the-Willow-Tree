@@ -9,10 +9,18 @@ class GameEngine:
         self._task = None
 
     async def _run_loop(self):
+        loop = asyncio.get_running_loop()
+        next_tick = loop.time()
         try:
             while self.running:
-                self.world_service.tick_world()
-                await asyncio.sleep(self.tick_rate)
+
+                now = loop.time()
+
+                while now >= next_tick:
+                    self.world_service.tick_world()
+                    next_tick += self.tick_rate
+
+                await asyncio.sleep(0)
         finally:
             self.running = False
             self._task = None

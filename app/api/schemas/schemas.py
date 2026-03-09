@@ -21,3 +21,4 @@ class SetMoodRequest(BaseModel):
     mood:my_enum.MOOD
     value: float
     method:my_enum.MOOD_METHOD
+

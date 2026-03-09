@@ -24,3 +24,4 @@ class EatSystem:
         new_actions=[]
         new_actions.append(SetMood(eids,[my_enum.MOOD.HAPPY]*len(eids),np.array([5 for i in range(len(eids))]),[my_enum.MOOD_METHOD.CALCULATE]*len(eids)))
         return new_actions
+        

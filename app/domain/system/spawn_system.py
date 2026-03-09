@@ -27,6 +27,7 @@ class SpawnSystem:
                 eid = self.world.entity_index.create()
                 eids.append(eid)
 
+
         self.world.l2.components[NameData].name[eids] = name
         self.world.l2.components[PositionData].x[eids] = x #???是否要分开赋值x,y
         self.world.l2.components[PositionData].y[eids] = y
