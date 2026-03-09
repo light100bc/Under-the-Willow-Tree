@@ -17,17 +17,23 @@ class Executor:
 
     def execute(self, actions):
         while actions:
+
             grouped = {}
+
             for action in actions:
                 grouped.setdefault(type(action), []).append(action)
 
-            new_actions = []
+            futures = []
             for action_type, acts in grouped.items():
                 system_type = self.system_types.get(action_type)
                 system = self.world.get_system(system_type) if system_type else None
-                if system:
-                    res = system.process(acts)
-                    if res:
-                        new_actions.extend(res)
+            if system:
+                futures.append(self.pool.submit(system.process, acts))
 
-            actions = new_actions
+            new_actions = []
+            for f in futures:
+                res = f.result()
+                if res:
+                    new_actions.extend(res)
+
+            return new_actions

@@ -24,4 +24,5 @@ class Scheduler:
         actions=[]
         actions = list(self.queue)
         self.queue.clear()
-        self.executor.execute(actions)
+        while actions:
+            actions = self.executor.execute(actions)
