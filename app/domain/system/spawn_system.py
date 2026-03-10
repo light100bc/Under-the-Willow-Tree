@@ -1,36 +1,49 @@
-    
 import numpy as np
 
 from app.domain.simulation.l2.components.attr import NameData
-from app.config import my_enum
+from app.domain.commands.create_npc_command import SpawnNPCCommand
+from app.domain.errors import EntityCapacityExceeded
+
 
 class SpawnSystem:
-    def __init__(self,world):
+    def __init__(self, world):
         self.world = world
-    def process(self, actions):
-        from  app.domain.simulation.l2.components.attr import HungerData, PositionData, EmotionData
 
-        eids=[]
-        name=[]
-        x=[]
-        y=[]
+    def process(self, actions, cmd_buffer):
+        eids = []
+        names = []
+        xs = []
+        ys = []
+
         for action in actions:
-            if type(action.name)==list:
-                eids.extend([self.world.entity_index.create() for i in range(len(action.name))])
-                name.extend(action.name)
-                x.extend(action.x)
-                y.extend(action.y)
+            if isinstance(action.name, list):
+                count = len(action.name)
+                if self.world.entity_index.remaining_count() < count:
+                    raise EntityCapacityExceeded(
+                        self.world.entity_index.capacity,
+                        self.world.entity_index.remaining_count(),
+                    )
+
+                new_eids = [self.world.entity_index.create() for _ in range(count)]
+                eids.extend(new_eids)
+                names.extend(action.name)
+                xs.extend(action.x)
+                ys.extend(action.y)
             else:
-                name.append(action.name)
-                x.append(action.x)
-                y.append(action.y)
+                if self.world.entity_index.remaining_count() < 1:
+                    raise EntityCapacityExceeded(
+                        self.world.entity_index.capacity,
+                        self.world.entity_index.remaining_count(),
+                    )
+
                 eid = self.world.entity_index.create()
                 eids.append(eid)
+                names.append(action.name)
+                xs.append(action.x)
+                ys.append(action.y)
 
+        if not eids:
+            return []
 
-        self.world.l2.components[NameData].name[eids] = name
-        self.world.l2.components[PositionData].x[eids] = x #???是否要分开赋值x,y
-        self.world.l2.components[PositionData].y[eids] = y
-        self.world.l2.components[HungerData].value[eids] = [30 for i in range(len(eids))]
-        for emotion in my_enum.MOOD:
-            self.world.l2.components[EmotionData].moods[emotion][eids] = np.array([0 for i in range(len(eids))])
+        cmd_buffer.add(SpawnNPCCommand(eids, names, xs, ys))
+        return []

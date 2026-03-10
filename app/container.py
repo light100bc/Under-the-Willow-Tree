@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from app.domain.system.eat_system import EatSystem
+from app.domain.system.hunger_system import HungerSystem
 from app.domain.system.spawn_system import SpawnSystem
 from app.domain.system.emotion_system import EmotionSystem
 from app.domain.world import World
@@ -22,7 +22,7 @@ class AppContainer:
 
 
 def generate_world(world: World) -> None:
-    world.add_system(EatSystem, EatSystem(world))
+    world.add_system(HungerSystem, HungerSystem(world))
     world.add_system(SpawnSystem, SpawnSystem(world))
     world.add_system(EmotionSystem, EmotionSystem(world))
 

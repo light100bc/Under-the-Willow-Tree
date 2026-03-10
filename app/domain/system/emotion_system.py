@@ -1,46 +1,103 @@
+import numpy as np
 
 import app.config.my_enum as my_enum
 from app.domain.simulation.l2.components.attr import EmotionData
-# 判断can marry，复杂计算（比如happy增加值设计personality）
-#只影响“单个个体内部状态”的行为，可以只用 Action 类。
-# system用于规则，是action发生后触发的规则
-# # action用class因为涉及多个实体 / 合法性判断的行为
-# class MarriageSystem:
-#     def __init__(self,world):
-#         self.world=world
+from app.domain.commands.change_emotion_command import EmotionChangeCommand
 
-#     def marry(self, a, b,world):
-#         if world==None:
-#             world=self.world
-#         marriage_pool = world.get_component(Marriage)
-#         marriage_pool[a].spouse = b
-#         marriage_pool[b].spouse = a
-
-#         world.event_bus.emit("marriage", {"a": a, "b": b})
 
 class EmotionSystem:
-    def __init__(self,world):
-        self.world=world
-        #订阅event_bus这个事件处理器，有marriage事件时，触发on_marriage
-        # world.event_bus.subscribe("marriage", self.on_marriage)
-        
+    def __init__(self, world):
+        self.world = world
+
     def on_marriage(self, data):
-        # a = data["a"]
-        # b = data["b"]
-        # self.world.dispatch(Set_Mood(a,my_enum.MOOD.HAPPY,20,my_enum.MOOD_METHOD.CALCULATE))
-        # self.world.dispatch(Set_Mood(b,my_enum.MOOD.HAPPY,20,my_enum.MOOD_METHOD.CALCULATE))
         pass
 
-    def process(self,actions):
+    def process(self, actions, cmd_buffer):
+        eids = []
+        moods = []
+        values = []
+        methods = []
+
         for action in actions:
-            if type(action.entity)==list:
-                for i,eid in enumerate(action.entity): 
-                    if action.method[i]==my_enum.MOOD_METHOD.CALCULATE:
-                        self.world.l2.components[EmotionData].moods[action.mood[i]][eid]+=action.value[i]
-                    else:
-                        self.world.l2.components[EmotionData].moods[action.mood[i]][eid]=action.value[i]
+            if isinstance(action.entity, list):
+                eids.extend(action.entity)
+                moods.extend(action.mood)
+                values.extend(action.value)
+                methods.extend(action.method)
             else:
-                if action.method==my_enum.MOOD_METHOD.CALCULATE:
-                    self.world.l2.components[EmotionData].moods[action.mood][action.entity]+=action.value
-                else:
-                    self.world.l2.components[EmotionData].moods[action.mood][action.entity]=action.value
+                eids.append(action.entity)
+                moods.append(action.mood)
+                values.append(action.value)
+                methods.append(action.method)
+
+        eids = np.array(eids)
+        moods = np.array(moods)
+        values = np.array(values)
+        methods = np.array(methods)
+
+        emotion_data = self.world.l2.components[EmotionData]
+
+        calc_mask = methods == my_enum.MOOD_METHOD.CALCULATE
+        final_eids = []
+        final_moods = []
+        final_values = []
+
+        if np.any(calc_mask):
+            calc_eids = eids[calc_mask]
+            calc_moods = moods[calc_mask]
+            calc_values = values[calc_mask]
+
+            for mood in np.unique(calc_moods):
+                m_mask = calc_moods == mood
+                m_eids = calc_eids[m_mask]
+                m_vals = calc_values[m_mask]
+
+                acc = np.bincount(m_eids, weights=m_vals)
+                ids = np.nonzero(acc)[0]
+                vals = acc[ids]
+
+                current = emotion_data.moods[mood][ids]
+                new_vals = np.clip(current + vals, 0, 100)
+
+                final_eids.extend(ids)
+                final_moods.extend([mood] * len(ids))
+                final_values.extend(new_vals)
+
+        if final_eids:
+            cmd_buffer.add(
+                EmotionChangeCommand(
+                    np.array(final_eids),
+                    np.array(final_moods),
+                    np.array(final_values),
+                )
+            )
+
+        set_mask = methods == my_enum.MOOD_METHOD.SET
+        final_eids = []
+        final_moods = []
+        final_values = []
+
+        if np.any(set_mask):
+            set_eids = eids[set_mask]
+            set_moods = moods[set_mask]
+            set_values = values[set_mask]
+
+            for mood in np.unique(set_moods):
+                m_mask = set_moods == mood
+                m_eids = set_eids[m_mask]
+                m_vals = set_values[m_mask]
+
+                final_eids.extend(m_eids)
+                final_moods.extend([mood] * len(m_eids))
+                final_values.extend(m_vals)
+
+        if final_eids:
+            cmd_buffer.add(
+                EmotionChangeCommand(
+                    np.array(final_eids),
+                    np.array(final_moods),
+                    np.array(final_values),
+                )
+            )
+
+        return []

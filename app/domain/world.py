@@ -3,6 +3,7 @@ from app.domain.simulation.l2.L2_Components import L2Components
 from app.engine.event_bus import EventBus
 from app.engine.scheduler import Scheduler
 from app.engine.time_system import TimeSystem
+from app.engine.command_buffer import CommandBuffer
 
 
 class World:
@@ -12,10 +13,10 @@ class World:
 
         self.systems = {}
         self.time = TimeSystem()
-        self.scheduler = Scheduler(self)
-        self.running = False
-        self.action_queue = []
+        self.command_buffer = CommandBuffer()
+        self.scheduler = Scheduler(self, self.command_buffer)
         self.event_bus = EventBus()
+        self.running = False
 
     def add_system(self, name, system):
         self.systems[name] = system
@@ -27,7 +28,5 @@ class World:
         self.time.advance()
 
         actions = []
-        for action in actions:
-            self.scheduler.schedule(action)
-
+        self.scheduler.schedule_batch(actions)
         self.scheduler.process()
